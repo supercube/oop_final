@@ -6,6 +6,8 @@ import java.awt.Image;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 
+import javax.swing.ImageIcon;
+
 import javahacker.Constant;
 import javahacker.TransparentIcon;
 public class CentaurSkeletonCard extends MonsterCard{
@@ -14,23 +16,19 @@ public class CentaurSkeletonCard extends MonsterCard{
 	private static Image[] imgs;
 	private static int no_img;
 	private static Image largeImage;
-	
+	private static Image symbolImage;
 	static {
-		no_img = 10;
+		no_img = 6;
 		imgs = new Image[no_img];
 		
-		imgs[0] = (new TransparentIcon("Images/Centaur_skeleton_1.png", Color.black)).getIcon().getImage();
-		imgs[1] = (new TransparentIcon("Images/Centaur_skeleton_2.png", Color.black)).getIcon().getImage();
-		imgs[2] = (new TransparentIcon("Images/Slime_3.png", new Color(0,0,0))).getIcon().getImage();
-		imgs[3] = (new TransparentIcon("Images/Slime_4.png", new Color(0,0,0))).getIcon().getImage();
-		imgs[4] = (new TransparentIcon("Images/Red_Slime.png", new Color(0,0,0))).getIcon().getImage();
-		imgs[5] = (new TransparentIcon("Images/Red_Slime_2.png", new Color(0,0,0))).getIcon().getImage();
-		imgs[6] = (new TransparentIcon("Images/Red_Slime_3.png", new Color(0,0,0))).getIcon().getImage();
-		imgs[7] = (new TransparentIcon("Images/Red_Slime_4.png", new Color(0,0,0))).getIcon().getImage();
-		imgs[8] = (new TransparentIcon("Images/Slime_dead.png", new Color(0,0,0))).getIcon().getImage();
-		imgs[9] = (new TransparentIcon("Images/Red_Slime_dead.png", new Color(0,0,0))).getIcon().getImage();
-		
-		largeImage = (new TransparentIcon("Images/CentaurSkeleton.jpg", new Color(0,0,0))).getIcon().getImage();
+		imgs[0] = (new TransparentIcon("Images/Monster/Centaur_skeleton_1.png", Color.black)).getIcon().getImage();
+		imgs[1] = (new TransparentIcon("Images/Monster/Centaur_skeleton_2.png", Color.black)).getIcon().getImage();
+		imgs[2] = (new TransparentIcon("Images/Monster/Centaur_skeleton_3.png", Color.black)).getIcon().getImage();
+		imgs[3] = (new TransparentIcon("Images/Monster/Centaur_skeleton_4.png", Color.black)).getIcon().getImage();
+		imgs[4] = (new TransparentIcon("Images/Monster/Centaur_skeleton_dead1.png", Color.black)).getIcon().getImage();
+		imgs[5] = (new TransparentIcon("Images/Monster/Centaur_skeleton_dead2.png", Color.black)).getIcon().getImage();
+		symbolImage = (new TransparentIcon("Images/Symbol/CentaurSkeleton_Symbol.png", Color.black)).getIcon().getImage();
+		largeImage = new ImageIcon("Images/Card/large_CentaurSkeleton.jpg").getImage();
 	}
 	
 	
@@ -38,21 +36,22 @@ public class CentaurSkeletonCard extends MonsterCard{
 		reset();
 	}
 	
-	public Monster newMonster(int x, int y){
+	public Monster newMonster(int team, int x, int y){
 		
 		if(summonCount <= 0)
 			return null;
 		
 		summonCount--;
-		return new CentaurSkeleton(this, HP, MP, AGI, SIGHT, x, y);
+		return new CentaurSkeleton(this, team, HP, MP, AGI, SIGHT, x, y);
 	}
 	
 	public void reset(){
 		setHP(20);
 		setMP(20);
-		setAGI(20);
-		setSIGHT(10);
-		setSummonCount(3);
+		setAGI(60);
+		setSIGHT(150);
+		setSummonCount(2);
+		setSkill(new SwordSkillCard(), 0);
 		setName("CentaurSkeleton");
 		img_id = rnd.nextInt(4);
 		resetCardImage();
@@ -67,7 +66,6 @@ public class CentaurSkeletonCard extends MonsterCard{
 	}
 	
 	public Image getImage(int img_id){
-		System.out.println(img_id + " in ");
 		return imgs[img_id];
 	}
 	
@@ -76,5 +74,8 @@ public class CentaurSkeletonCard extends MonsterCard{
 	}
 	public int getImageHeight(){
 		return 70;
+	}
+	public Image getSymbolImage() {
+		return symbolImage;
 	}
 }

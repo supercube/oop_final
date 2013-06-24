@@ -4,53 +4,64 @@ import java.awt.Image;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.Image;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
+
+import javax.swing.ImageIcon;
 
 import javahacker.Constant;
 import javahacker.TransparentIcon;
 
-import javax.swing.ImageIcon;
 
 public class TinyAttackSkillCard extends SkillCard{
 	
 	private static Image symbolImage;
 	
-	private int img_id;
 	private static Image[] imgs;
-	private static int no_img;
 	private static Image largeImage;
 	
 	
 	static {
-		symbolImage = (new TransparentIcon("Images/TAS_Symbol.png", new Color(0,0,0))).getIcon().getImage();
-		no_imgs = 2;
-		imgs = new Image[no_imgs];
-		imgs[0] = (new TransparentIcon("Images/TAS.png", new Color(0,0,0))).getIcon().getImage();
-		imgs[1] = (new TransparentIcon("Images/TAS_2.png", new Color(0,0,0))).getIcon().getImage();
+		
+		imgs = new Image[2];
+		imgs[0] = (new TransparentIcon("Images/Skill/TAS.png", Color.black)).getIcon().getImage();
+		imgs[1] = (new TransparentIcon("Images/Skill/TAS_2.png", Color.black)).getIcon().getImage();
+		
+		largeImage = new ImageIcon("Images/Card/large_TAS.png").getImage();
+		symbolImage = (new TransparentIcon("Images/Symbol/TAS_Symbol.png", Color.black)).getIcon().getImage();
 	}
 	
 	
-	public TinyAttackSkillCard(MonsterCard target, boolean isCard){
+	public TinyAttackSkillCard(MonsterCard target){
 		super(target);
 		reset();
-		if(isCard){
-			resetCardImage();
-		}
-		
+		resetCardImage();
+	}
+	
+	public TinyAttackSkillCard(){
+		super(null);
+		reset();
+		resetCardImage();
+	}
+	
+	public Skill newSkill(Monster caster, int posX, int posY){
+		return new TinyAttackSkill(this, caster, ttl, HP, AGI, SIGHT, posX, posY);
 	}
 	
 	public void reset(){
+		HP = 10;
+		AGI = 10;
+		SIGHT = 15;
 		img_id = 0;
-		ttl = 30;
+		ttl = 40;
+		setName("Scratch");
 	}
 	
 	public void resetCardImage(){
 		cardImage = config.createCompatibleImage(Constant.CARDSIZE_X, Constant.CARDSIZE_Y, Transparency.BITMASK);
 		Graphics g = ((BufferedImage)cardImage).createGraphics();
+		g.drawImage(largeImage, 0, 0, null);
 		g.drawImage(getHolderImage(), 0, 0, null);
-		g.drawImage(largeImage, 10, 10, null);
 		g.dispose();
 	}
 	
@@ -77,35 +88,18 @@ public class TinyAttackSkillCard extends SkillCard{
         }
     }
 	
-	/*public boolean oneTimeStep((Arena arena, POOCoordinate pos){
-		ttl -= 1;
-		
-		Cell[][] map = arena.getMap();
-		
-		if(ttl == 20){
-			POOConstant.Type type = map[pos.x][pos.y].getType();
-			if(type == POOConstant.Type.PET || type == POOConstant.Type.PLAYER){
-				act((Pet)map[pos.x][pos.y].getObject());
-			}else if(type == POOConstant.Type.OBSTACLE){
-				act((Obstacle)map[pos.x][pos.y].getObject());
-			}
-		}
-		if(ttl <= 15){
-			_img_id = 1;
-		}
-		return vanish();
-	}*/
 	
-	public static int getCD(){
-		return 35;
+	public int getCD(){
+		return 100;
 	}
 	
-	public static int getMPConsume(){
+	public int getMPConsume(){
 		return 1;
 	}
 	
 	public Image getImage(int img_id){
 		return imgs[img_id];
+		
 	}
 	
 	public int getImageWidth(){
@@ -114,6 +108,8 @@ public class TinyAttackSkillCard extends SkillCard{
 	public int getImageHeight(){
 		return 30;
 	}
+
+
 	
 }
 

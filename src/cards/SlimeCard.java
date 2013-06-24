@@ -6,6 +6,8 @@ import java.awt.Image;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 
+import javax.swing.ImageIcon;
+
 import javahacker.Constant;
 import javahacker.TransparentIcon;
 
@@ -14,24 +16,21 @@ public class SlimeCard extends MonsterCard{
 	
 	
 	private static Image[] imgs;
-	private static int no_img;
 	private static Image largeImage;
-	
+	private static Image symbolImage;
 	static {
-		no_img = 10;
-		imgs = new Image[no_img];
-		imgs[0] = (new TransparentIcon("Images/Slime.png", new Color(0,0,0))).getIcon().getImage();
-		imgs[1] = (new TransparentIcon("Images/Slime_2.png", new Color(0,0,0))).getIcon().getImage();
-		imgs[2] = (new TransparentIcon("Images/Slime_3.png", new Color(0,0,0))).getIcon().getImage();
-		imgs[3] = (new TransparentIcon("Images/Slime_4.png", new Color(0,0,0))).getIcon().getImage();
-		imgs[4] = (new TransparentIcon("Images/Red_Slime.png", new Color(0,0,0))).getIcon().getImage();
-		imgs[5] = (new TransparentIcon("Images/Red_Slime_2.png", new Color(0,0,0))).getIcon().getImage();
-		imgs[6] = (new TransparentIcon("Images/Red_Slime_3.png", new Color(0,0,0))).getIcon().getImage();
-		imgs[7] = (new TransparentIcon("Images/Red_Slime_4.png", new Color(0,0,0))).getIcon().getImage();
-		imgs[8] = (new TransparentIcon("Images/Slime_dead.png", new Color(0,0,0))).getIcon().getImage();
-		imgs[9] = (new TransparentIcon("Images/Red_Slime_dead.png", new Color(0,0,0))).getIcon().getImage();
-		
-		largeImage = (new TransparentIcon("Images/largeslime.png", new Color(0,0,0))).getIcon().getImage();
+		imgs = new Image[9];
+		imgs[0] = (new TransparentIcon("Images/Monster/Slime.png", new Color(0,0,0))).getIcon().getImage();
+		imgs[1] = (new TransparentIcon("Images/Monster/Slime_2.png", new Color(0,0,0))).getIcon().getImage();
+		imgs[2] = (new TransparentIcon("Images/Monster/Slime_3.png", new Color(0,0,0))).getIcon().getImage();
+		imgs[3] = (new TransparentIcon("Images/Monster/Slime_4.png", new Color(0,0,0))).getIcon().getImage();
+		imgs[4] = (new TransparentIcon("Images/Monster/Red_Slime.png", new Color(0,0,0))).getIcon().getImage();
+		imgs[5] = (new TransparentIcon("Images/Monster/Red_Slime_2.png", new Color(0,0,0))).getIcon().getImage();
+		imgs[6] = (new TransparentIcon("Images/Monster/Red_Slime_3.png", new Color(0,0,0))).getIcon().getImage();
+		imgs[7] = (new TransparentIcon("Images/Monster/Red_Slime_4.png", new Color(0,0,0))).getIcon().getImage();
+		imgs[8] = (new TransparentIcon("Images/Monster/Slime_dead.png", Color.black)).getIcon().getImage();
+		symbolImage = (new TransparentIcon("Images/Symbol/Slime_Symbol.png", Color.black)).getIcon().getImage();
+		largeImage = new ImageIcon("Images/Card/large_Slime.png").getImage();
 	}
 	
 	
@@ -39,21 +38,22 @@ public class SlimeCard extends MonsterCard{
 		reset();
 	}
 	
-	public Monster newMonster(int x, int y){
+	public Monster newMonster(int team, int x, int y){
 		
 		if(summonCount <= 0)
 			return null;
 		
 		summonCount--;
-		return new Slime(this, HP, MP, AGI, SIGHT, x, y);
+		return new Slime(this, team, HP, MP, AGI, SIGHT, x, y);
 	}
 	
 	public void reset(){
 		setHP(3);
 		setMP(3);
 		setAGI(10);
-		setSIGHT(3);
-		setSummonCount(20);
+		setSIGHT(100);
+		setSummonCount(10);
+		setSkill(new TinyAttackSkillCard(),0);
 		setName("Slime");
 		resetCardImage();
 	}
@@ -75,5 +75,8 @@ public class SlimeCard extends MonsterCard{
 	}
 	public int getImageHeight(){
 		return 30;
+	}
+	public Image getSymbolImage() {
+		return symbolImage;
 	}
 }

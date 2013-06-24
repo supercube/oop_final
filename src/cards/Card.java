@@ -17,7 +17,7 @@ public abstract class Card{
 	public static final Random rnd = new Random();
 	public abstract Image getHolderImage();
     public abstract void setHolderImage(Image holder);
-
+    public abstract void resetCardImage();
 	protected Image cardImage;
 	
 	protected final static GraphicsConfiguration config;
@@ -43,6 +43,8 @@ public abstract class Card{
 		return cardImage;
 	}
 	
-	public abstract void resetCardImage();
+	public Card copy() throws Exception{
+		return this.getClass().newInstance();
+	}
 	
 }

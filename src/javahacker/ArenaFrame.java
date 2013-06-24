@@ -1,40 +1,40 @@
 package javahacker;
 
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.*;
 
 import javax.swing.*;
 
 import cards.ConcreteCard;
 import cards.LeadingRole;
 import cards.LeadingRoleCard;
+import cards.PortalCard;
+import cards.Skill;
 
 import java.util.ArrayList;
 
-public class ArenaFrame extends JFrame implements MouseListener{
+public class ArenaFrame extends JFrame implements MouseListener, MouseMotionListener, KeyListener{
 		
 	private Container c;
 	private BattleFieldPanel battle_field;
 	private CardPanel card_panel;
-	private LeadingRole player;
 	private int width, height;
 	private int posX, posY;
-	public ArenaFrame(String title, LeadingRole player, String background, String battleBG, String cardBG){
+	private Arena arena;
+	private int skill_id;
+	public ArenaFrame(String title, Arena arena, String background, String battleBG, String cardBG){
 		setTitle(title);
-		this.player = player;
+		this.arena = arena;
 		Toolkit tk = Toolkit.getDefaultToolkit();
 		Dimension screenSize = tk.getScreenSize();
 		width = (int)screenSize.getWidth();
 		height = (int)screenSize.getHeight();
 		posX = (width-Constant.BATTLEFIELD_WIDTH)/2;
 		posY = (height-Constant.BATTLEFIELD_HEIGHT-Constant.CARDPANEL_HEIGHT)/2;
-		
-		System.out.printf("(%d, %d), (%d, %d)", posX, posY, width, height);
-		addKeyListener(new Adapter());
+		skill_id = 0;
+		addKeyListener(this);
 		addMouseListener(this);
+		addMouseMotionListener(this);
 		
 		setUndecorated(true);
         setExtendedState(JFrame.MAXIMIZED_BOTH);
@@ -43,12 +43,12 @@ public class ArenaFrame extends JFrame implements MouseListener{
 		c.setLayout(null);
 		
 		
-		battle_field = new BattleFieldPanel(Constant.BATTLEFIELD_WIDTH, Constant.BATTLEFIELD_HEIGHT);
+		battle_field = new BattleFieldPanel(Constant.BATTLEFIELD_WIDTH, Constant.BATTLEFIELD_HEIGHT, arena);
 		battle_field.setBounds(posX, posY, Constant.BATTLEFIELD_WIDTH, Constant.BATTLEFIELD_HEIGHT);
 		battle_field.setOpaque(false);
 		c.add(battle_field);
 		
-		card_panel = new CardPanel(Constant.CARDPANEL_WIDTH, Constant.CARDPANEL_HEIGHT);
+		card_panel = new CardPanel(Constant.CARDPANEL_WIDTH, Constant.CARDPANEL_HEIGHT, arena);
 		card_panel.setBounds(posX, posY+Constant.BATTLEFIELD_HEIGHT, Constant.CARDPANEL_WIDTH, Constant.CARDPANEL_HEIGHT);
 		card_panel.setOpaque(false);
 		c.add(card_panel);
@@ -92,148 +92,174 @@ public class ArenaFrame extends JFrame implements MouseListener{
 		img_label.setBounds(posX, posY+Constant.BATTLEFIELD_HEIGHT, Constant.CARDPANEL_WIDTH, Constant.CARDPANEL_HEIGHT); 
 	}
 	
-	public int addToArenaIOPanel(Image img, int x, int y, int width, int height, int id){
+	public int addToBattleField(Image img, int x, int y, int width, int height, int id){
 		return battle_field.addToPaint(img, x, y, width, height, id);
 	}
 	
-/*public int addToBackground(Image img, int x, int y, int id){
-		return battle_field.addToBackground(img, x, y, id);
+	public int addToBackground(Image img, int x, int y, int width, int height, int id){
+		return battle_field.addToBackground(img, x, y, width, height, id);
 	}
 	
-	public int addToBackground(Image img, int x, int y){
-		return addToBackground(img, x, y, -1);
+	public int addToForeground(Image img, int x, int y, int width, int height, int id){
+		return battle_field.addToForeground(img, x, y, width, height, id);
 	}
 	
-	public int addToForeground(Image img, int x, int y, int id){
-		return battle_field.addToForeground(img, x, y, id);
-	}
-	
-	public int addToForeground(Image img, int x, int y){
-		return addToForeground(img, x, y, -1);
-	}*/
-	
-	public boolean addToHand(ConcreteCard card, int no){
-		return card_panel.addToHand(card, no);
+	public boolean addToHand(ConcreteCard card){
+		return card_panel.addToHand(card);
 	}
 
 	
-	public boolean removeFromIOPanel(int id){
+	public boolean removeFromBattleField(int id){
 		return battle_field.removeFromCell(id);
+	}
+	
+	public boolean removeFromBackground(int id){
+		return battle_field.removeFromBackground(id);
+	}
+	
+	public boolean removeFromForeground(int id){
+		return battle_field.removeFromForeground(id);
 	}
 	
 	public void reset(){
 		battle_field.reset();
 	}
 	
-private class Adapter extends KeyAdapter{
-		
-		public void keyPressed(KeyEvent e) {
-			int key = e.getKeyCode();
-            /* player key 
-            switch(key){
-            	case KeyEvent.VK_UP:
-            		if(_cmds.size() > 1)
-        				_cmds.remove(_cmds.size() - 1);
-            		_cmds.add(new Command(POOConstant.Cmd.UP));
-            		break;
-            	case KeyEvent.VK_DOWN:
-            		if(_cmds.size() > 1)
-        				_cmds.remove(_cmds.size() - 1);
-            		_cmds.add(new Command(POOConstant.Cmd.DOWN));
-            		break;
-            	case KeyEvent.VK_LEFT:
-            		if(_cmds.size() > 1)
-        				_cmds.remove(_cmds.size() - 1);
-            		_cmds.add(new Command(POOConstant.Cmd.LEFT));
-            		break;
-            	case KeyEvent.VK_RIGHT:
-            		if(_cmds.size() > 1)
-        				_cmds.remove(_cmds.size() - 1);
-            		_cmds.add(new Command(POOConstant.Cmd.RIGHT));
-            		break;
-            	case KeyEvent.VK_Z:
-            		if(_cmds.size() > 1)
-        				_cmds.remove(_cmds.size() - 1);
-            		_cmds.add(new Command(POOConstant.Cmd.Z));
-            		break;
-            	case KeyEvent.VK_X:
-            		if(_cmds.size() > 1)
-        				_cmds.remove(_cmds.size() - 1);
-            		_cmds.add(new Command(POOConstant.Cmd.X));
-            		break;
-            	case KeyEvent.VK_SPACE:
-            		if(_cmds.size() > 1)
-        				_cmds.remove(_cmds.size() - 1);
-            		_cmds.add(new Command(POOConstant.Cmd.SPACE));
-            		break;
-            	default:;
-            }*/
-            
-            /* functional key 
-            switch(key){
-            	case KeyEvent.VK_F1:
-            		_game._fog = !_game._fog;
-            		break;
-            	case KeyEvent.VK_F2:
-            		_game._player_control = !_game._player_control;
-            		break;
-            	case KeyEvent.VK_SPACE:
-            	case KeyEvent.VK_ENTER:
-            		if(_game._status != POOConstant.Game.WIN && _game._status != POOConstant.Game.GAMEOVER)
-            			break;
-            	case KeyEvent.VK_F9:	// restart game
-            		_game._status = POOConstant.Game.UNDEFINED;
-        			break;
-            	case KeyEvent.VK_ESCAPE:
-            		_game._status = POOConstant.Game.END;
-            		System.exit(0);
-            		break;
-            	
-            	default:;
-            }*/
-        }
+	public void removePortalCard(int id){
+		card_panel.removePortalCard(id);
 	}
-
+	
+		
 	/* mouse events */
-	public void mouseClicked(MouseEvent e) {
+	public void mousePressed(MouseEvent e)
+	{
+		int x = e.getX();
+		int y = e.getY();
+		/* left click */
+		if(e.getButton() == MouseEvent.BUTTON1){
+			if(x >= posX && x < posX + Constant.BATTLEFIELD_WIDTH){
+				if(y >= posY){
+					if(y < posY + Constant.BATTLEFIELD_HEIGHT){
+						battle_field.doPress((x - posX), (y - posY));
+						return;
+					}else if(y < posY + Constant.BATTLEFIELD_HEIGHT + Constant.CARDPANEL_HEIGHT){
+						card_panel.doDrag(x - posX, y - (posY+Constant.BATTLEFIELD_HEIGHT));
+						return;
+					}
+				}
+			}
+		/* right click */
+		}else if(e.getButton() == MouseEvent.BUTTON3){
+			if(x >= posX && x < posX + Constant.BATTLEFIELD_WIDTH){
+				if(y >= posY){
+					if(y < posY + Constant.BATTLEFIELD_HEIGHT){
+						Skill skill = arena.player.useSkill(skill_id, x - posX, y - posY);
+						if(skill != null){
+							arena.addSkill(skill);
+						}
+						return;
+					}else if(y < posY + Constant.BATTLEFIELD_HEIGHT + Constant.CARDPANEL_HEIGHT){
+						card_panel.changeDetail(x - posX, y - (posY+Constant.BATTLEFIELD_HEIGHT));
+						return;
+					}
+				}
+				
+			}
+		}
+	}
+	
+	public void mouseReleased(MouseEvent e)
+	{
+		int x = e.getX();
+		int y = e.getY();
+		card_panel.releaseDrag(x - posX, y - (posY+Constant.BATTLEFIELD_HEIGHT));
+		if(x >= posX && x < posX + Constant.BATTLEFIELD_WIDTH){
+			if(y >= posY){
+				if(y < posY + Constant.BATTLEFIELD_HEIGHT){
+					return;
+				}else if(y < posY + Constant.BATTLEFIELD_HEIGHT + Constant.CARDPANEL_HEIGHT){
+					return;
+				}
+			}
+		}
+	}
+	public void mouseDragged(MouseEvent e)
+	{
 		int x = e.getX();
 		int y = e.getY();
 		if(x >= posX && x < posX + Constant.BATTLEFIELD_WIDTH){
 			if(y >= posY){
 				if(y < posY + Constant.BATTLEFIELD_HEIGHT){
-					System.out.println("battle field" + (x - posX) + ", " + (y - posY));
-					player.setTargetPosition(x - posX, y - posY);
 					return;
 				}else if(y < posY + Constant.BATTLEFIELD_HEIGHT + Constant.CARDPANEL_HEIGHT){
-					System.out.println("card panel");
+					card_panel.dragging(x - posX, y - (posY+Constant.BATTLEFIELD_HEIGHT));
 					return;
 				}
 			}
 		}
-		System.out.println("background " + x + ", " + y);
 	}
 	
-	@Override
-	public void mouseEntered(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
+	public void mouseClicked(MouseEvent e){
+		if(e.getClickCount() >= 2){
+			int x = e.getX();
+			int y = e.getY();
+			if(x >= posX && x < posX + Constant.BATTLEFIELD_WIDTH){
+				if(y >= posY){
+					if(y < posY + Constant.BATTLEFIELD_HEIGHT){
+						
+					}else if(y < posY + Constant.BATTLEFIELD_HEIGHT + Constant.CARDPANEL_HEIGHT){
+						card_panel.doDoubleClick(x - posX, y - (posY+Constant.BATTLEFIELD_HEIGHT));
+						return;
+					}
+				}
+			}
+		}
+				
 	}
 	
-	@Override
-	public void mouseExited(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
+	public void mouseMoved(MouseEvent e){}
+	public void mouseEntered(MouseEvent e){}
+	public void mouseExited(MouseEvent e){}
 	
-	@Override
-	public void mousePressed(MouseEvent arg0) {
-		// TODO Auto-generated method stub
-		
-	}
 	
-	@Override
-	public void mouseReleased(MouseEvent arg0) {
-		// TODO Auto-generated method stub
+	private Constant.GameStatus prevGameStatus;
+	public void keyPressed(KeyEvent e) {
+		
+		switch(e.getKeyCode()){
+			case KeyEvent.VK_Z:
+				skill_id = 0;
+				break;
+			case KeyEvent.VK_X:
+				skill_id = 1;
+				break;
+			case KeyEvent.VK_C:
+				skill_id = 2;
+				break;
+			case KeyEvent.VK_V:
+				skill_id = 3;
+				break;
+			case KeyEvent.VK_SPACE:
+				if(arena.game == Constant.GameStatus.PAUSE){
+					arena.game = prevGameStatus;
+				}else{
+					prevGameStatus = arena.game;
+					arena.game = Constant.GameStatus.PAUSE;
+				}
+				break;
+			case KeyEvent.VK_ESCAPE:
+				arena.game = Constant.GameStatus.END;
+				break;
+			default:;
+		}
 		
 	}
+
+	public void keyReleased(KeyEvent arg0) {}
+	public void keyTyped(KeyEvent arg0) {}
+	
+	public void redraw(){
+		card_panel.redraw();
+		repaint();
+	}
+
 }

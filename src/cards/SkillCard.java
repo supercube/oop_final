@@ -1,16 +1,16 @@
 package cards;
 
-import java.awt.Graphics;
+import java.awt.Color;
 import java.awt.Image;
-import java.awt.Transparency;
-import java.awt.image.BufferedImage;
-
-import javahacker.Constant;
-import javahacker.Constant.CardType;
-
 import javax.swing.ImageIcon;
+import javahacker.Constant;
+import javahacker.TransparentIcon;
+
+
 
 public abstract class SkillCard extends Card implements DImage{
+	protected int HP, AGI, SIGHT;
+	protected String name;
 	
 	private static Image holder;
 	private MonsterCard target;
@@ -19,12 +19,14 @@ public abstract class SkillCard extends Card implements DImage{
 	protected static Image[] imgs;
 	protected static int no_imgs;
 	
+	
+	public abstract Skill newSkill(Monster caster, int targetX, int targetY);
 	public abstract Image getSymbolImage();
 	
 	public SkillCard(MonsterCard target){
 		this.target = target;
 		setType(Constant.CardType.SKILL);
-		setHolderImage((new ImageIcon("Images/CardHolder.png")).getImage());
+		setHolderImage((new TransparentIcon("Images/Card/SkillCardHolder.png", Color.black)).getIcon().getImage());
 	}
 	protected int img_id;
 	protected int ttl;
@@ -35,13 +37,17 @@ public abstract class SkillCard extends Card implements DImage{
 	
 	public abstract void act(Obstacle ob);
 	
-	public static int getCD(){
-		return 10000;
-	}
+	public abstract int getCD();
 	
-	public static int getMPConsume(){
-		return 10000;
-	}
+	public abstract int getMPConsume();
+	
+	public final void setName(String name){
+        this.name = name;
+    }
+    
+    public final String getName(){
+        return name;
+    }
 	
 	public Image getHolderImage(){
 		return holder;

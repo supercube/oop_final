@@ -4,6 +4,10 @@ import java.awt.*;
 
 import javax.swing.*;
 
+import cards.LeadingRole;
+import cards.PortalCard;
+import cards.SkillCard;
+
 import java.awt.event.*;
 import java.util.ArrayList;
 
@@ -19,12 +23,14 @@ public class BattleFieldPanel extends JPanel{
 	private int imgcs_len, bgcs_len, fgcs_len, maximgcs;
 	
 	/* interaction with arena */
-	
+	private Arena arena;
 	private int _counter;
 	
-	public BattleFieldPanel(int width, int height){
+	public BattleFieldPanel(int width, int height, Arena arena){
 		this.width = width;
 		this.height = height;
+		
+		this.arena = arena;
 		unit_size = ((double)Toolkit.getDefaultToolkit().getScreenResolution())/ 72;
 		maximgcs = width * height;
 		imgcs = new ImageCell[maximgcs];
@@ -49,8 +55,8 @@ public class BattleFieldPanel extends JPanel{
 	
 	/* add normal image to imgcs */
 	public int addToPaint(Image img, int x, int y, int width, int height, int id){
-		if(x < 0 || x >= Constant.BATTLEFIELD_WIDTH || y < 0 || y >= Constant.BATTLEFIELD_HEIGHT)
-			return -1;
+		/*if(x < 0 || x >= Constant.BATTLEFIELD_WIDTH || y < 0 || y >= Constant.BATTLEFIELD_HEIGHT)
+			return -1;*/
 		if(id >= maximgcs)
 			return -1;
 		
@@ -68,19 +74,37 @@ public class BattleFieldPanel extends JPanel{
 		return id;
 	}
 	
-	/* add background image to backgroundcs 
-	public int addToBackground(Image img, int x, int y, int id){
-		if(x < 0 || x >= Constant.BATTLEFIELD_WIDTH || y < 0 || y >= Constant.BATTLEFIELD_HEIGHT)
-			return -1;
+	public void doPress(int x, int y){
+		switch(arena.battlefield_todo){
+			case 0:
+				arena.player.setTargetPosition(x, y);
+				break;
+			case 1:
+				if(x < width/2){
+					arena.addPortal((PortalCard)arena.toAdd, 1, x, y);
+					arena.toAdd = null;
+					arena.battlefield_todo = 0;
+					this.getParent().setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+				}
+				break;
+			default:
+				arena.player.setTargetPosition(x, y);
+				break;
+		}
+	}
+	
+	/* add background image to backgroundcs */
+	public int addToBackground(Image img, int x, int y, int width, int height, int id){
+		/*if(x < 0 || x >= Constant.BATTLEFIELD_WIDTH || y < 0 || y >= Constant.BATTLEFIELD_HEIGHT)
+			return -1;*/
 		if(id >= maximgcs)
 			return -1;
 		
-		ImageCell imgc = new ImageCell(img, x, y);
+		ImageCell imgc = new ImageCell(img, x, y, width, height);
 		if(id < 0 && bgcs_len < maximgcs - 1){
 			backgroundcs[bgcs_len] = imgc;
 			id = bgcs_len;
 		}else if(id < maximgcs){
-			imgc.seen = backgroundcs[id].seen;
 			backgroundcs[id] = imgc;
 		}
 		
@@ -88,16 +112,16 @@ public class BattleFieldPanel extends JPanel{
 			bgcs_len = id + 1;
 		}
 		return id;
-	}*/
+	}
 	
-	/* add foreground image to foregroundcs 
-	public int addToForeground(Image img, int x, int y, int id){
-		if(x < 0 || x >= Constant.BATTLEFIELD_WIDTH || y < 0 || y >= Constant.BATTLEFIELD_HEIGHT)
-			return -1;
+	/* add foreground image to foregroundcs */
+	public int addToForeground(Image img, int x, int y, int width, int height, int id){
+		/*if(x < 0 || x >= Constant.BATTLEFIELD_WIDTH || y < 0 || y >= Constant.BATTLEFIELD_HEIGHT)
+			return -1;*/
 		if(id >= maximgcs)
 			return -1;
 		
-		ImageCell imgc = new ImageCell(img, x, y);
+		ImageCell imgc = new ImageCell(img, x, y, width, height);
 		if(id < 0 && fgcs_len < maximgcs - 1){
 			foregroundcs[fgcs_len] = imgc;
 			id = fgcs_len;
@@ -110,7 +134,7 @@ public class BattleFieldPanel extends JPanel{
 			fgcs_len = id + 1;
 		}
 		return id;
-	}*/
+	}
 	
 
 	
@@ -125,110 +149,94 @@ public class BattleFieldPanel extends JPanel{
 		return true;
 	}
 	
+	public boolean removeFromBackground(int id){
+		if(id >= bgcs_len || id < 0)
+			return false;
+		
+		backgroundcs[id] = null;
+		if(id == bgcs_len - 1)
+			bgcs_len--;
+		
+		return true;
+	}
+	
+	public boolean removeFromForeground(int id){
+		if(id >= fgcs_len || id < 0)
+			return false;
+		
+		foregroundcs[id] = null;
+		if(id == fgcs_len - 1)
+			fgcs_len--;
+		
+		return true;
+	}
 	
 	public void paint(Graphics g) {
-		/*switch(_game._status){
-			
-			    
+		switch(arena.game){
+			case INIT:
 			case INGAME:
 			case GAMEOVER:
+			case PAUSE:
 			case WIN:
 				inGamePaint(g);
-				if(_game._status == POOConstant.Game.GAMEOVER){
-					g.setFont(new Font("Arial", Font.BOLD, (int)Math.round(30.0 * _unit_size)));
+				if(arena.game == Constant.GameStatus.GAMEOVER){
+					g.setFont(new Font("Arial", Font.BOLD, (int)Math.round(30.0 * unit_size)));
 					g.setColor(Color.red);
-					g.drawString("Game Over", _x / 2 - (int)Math.round(90.0 * _unit_size), _y / 2 - (int)Math.round(10.0 * _unit_size));
-				}else if(_game._status == POOConstant.Game.WIN){
-					g.setFont(new Font("Arial", Font.BOLD, (int)Math.round(30.0 * _unit_size)));
+					g.drawString("Game Over", width / 2 - (int)Math.round(90.0 * unit_size), height / 2 - (int)Math.round(10.0 * unit_size));
+				}else if(arena.game == Constant.GameStatus.WIN){
+					g.setFont(new Font("Arial", Font.BOLD, (int)Math.round(30.0 * unit_size)));
 					g.setColor(Color.red);
-					g.drawString("W I N", _x / 2 - (int)Math.round(50.0 * _unit_size), _y / 2 - (int)Math.round(10.0 * _unit_size));
+					g.drawString("W I N", width / 2 - (int)Math.round(50.0 * unit_size), height / 2 - (int)Math.round(10.0 * unit_size));
+				}else if(arena.game == Constant.GameStatus.INIT){
+					g.setFont(new Font("Arial", Font.BOLD, (int)Math.round(30.0 * unit_size)));
+					g.setColor(Color.red);
+					g.drawString("Game Start", width / 2 - (int)Math.round(90.0 * unit_size), height / 2 - (int)Math.round(10.0 * unit_size));
 				}
 				break;
-			case INIT:
-				g.setFont(new Font("Arial", Font.BOLD, (int)Math.round(30.0 * _unit_size)));
-				g.setColor(Color.red);
-				g.drawString("Game Start", _x / 2 - (int)Math.round(90.0 * _unit_size), _y / 2 - (int)Math.round(10.0 * _unit_size));
-				break;
 			default:;
-		}*/
-		inGamePaint(g);
+		}
 	}
 	
 	public void inGamePaint(Graphics g) {
 			
 		
-		/* draw background units (dead body)
+		/* draw background units (dead body) */
 		for(int i = 0; i < bgcs_len; i++){
-			if(_fog[backgroundcs[i]._x * x_times + x_add][backgroundcs[i]._y * y_times + y_add] == POOConstant.Fog.BRIGHT){
-				backgroundcs[i]._seen = true;
-			}
-			if(backgroundcs[i] != null && backgroundcs[i]._seen){
-				g.drawImage(backgroundcs[i]._img, backgroundcs[i]._x * POOConstant.CELL_X_SIZE + backgroundcs[i]._paddingx, backgroundcs[i]._y * POOConstant.CELL_Y_SIZE + backgroundcs[i]._paddingy, this);
-			}
-		}*/
-		
-		/* draw units */
-		for(int i = 0; i < imgcs_len; i++){
-			if(imgcs[i] != null){// && _fog[imgcs[i]._x * x_times + x_add][imgcs[i]._y * y_times + y_add] == POOConstant.Fog.BRIGHT){
-				g.drawImage(imgcs[i].img, imgcs[i].x - imgcs[i].width/2, imgcs[i].y - imgcs[i].height/2, this);
-				System.out.println("**" + imgcs[i].height);
+			if(backgroundcs[i] != null){
+				g.drawImage(backgroundcs[i].img, backgroundcs[i].x - backgroundcs[i].width/2, backgroundcs[i].y - backgroundcs[i].height/2, this);
 			}
 		}
 		
-		/* draw foreground units 
+		/* draw units */
+		for(int i = 0; i < imgcs_len; i++){
+			if(imgcs[i] != null){
+				g.drawImage(imgcs[i].img, imgcs[i].x - imgcs[i].width/2, imgcs[i].y - imgcs[i].height/2, this);
+			}
+		}
+		
+		/* draw foreground units */
 		for(int i = 0; i < fgcs_len; i++){
-			if(_fog[foregroundcs[i]._x * x_times + x_add][foregroundcs[i]._y * y_times + y_add] == POOConstant.Fog.BRIGHT){
-				foregroundcs[i]._seen = true;
+			if(foregroundcs[i] != null){
+				g.drawImage(foregroundcs[i].img, foregroundcs[i].x - foregroundcs[i].width/2, foregroundcs[i].y - foregroundcs[i].height/2, this);
 			}
-			if(foregroundcs[i] != null && foregroundcs[i]._seen){
-				g.drawImage(foregroundcs[i]._img, foregroundcs[i]._x * POOConstant.CELL_X_SIZE + foregroundcs[i]._paddingx, foregroundcs[i]._y * POOConstant.CELL_Y_SIZE + foregroundcs[i]._paddingy, this);
-			}
-		}*/
+		}
 		
-		/* draw fog of war 
-		for(int i = 0; i < _no_fog_x; i++){
-			for(int j = 0; j < _no_fog_y; j++){
-				switch(_fog[i][j]){
-					case UNSEEN:
-						g.drawImage(_unseen, i * (POOConstant.FOG_X_SIZE), j * (POOConstant.FOG_Y_SIZE), this);
-						break;
-					case SEEN:
-						g.drawImage(_seen, i * (POOConstant.FOG_X_SIZE), j * (POOConstant.FOG_Y_SIZE), this);
-						break;
-					default:;
-				}
-			}
-		}*/
 		
-		/* draw player info 
-		int fontSize = (int)Math.round(10.0 * _unit_size);
+		/* draw player info */
+		int fontSize = (int)Math.round(10.0 * unit_size);
 	    g.setFont(new Font("Arial", Font.BOLD, fontSize));
 		g.setColor(Color.red);
-        g.drawString("HP: ", (int)Math.round(5.0 * _unit_size), (int)Math.round(12.0 * _unit_size));
-        g.fillRect((int)Math.round(30.0 * _unit_size), (int)Math.round(7.0 * _unit_size), (int)Math.round(_player.getHP() * 4 * _unit_size), (int)Math.round(5.0 * _unit_size));
+        g.drawString("HP: ", (int)Math.round(5.0 * unit_size), (int)Math.round(12.0 * unit_size));
+        g.fillRect((int)Math.round(30.0 * unit_size), (int)Math.round(7.0 * unit_size), (int)Math.round(arena.player.getHP() * 4 * unit_size), (int)Math.round(5.0 * unit_size));
         g.setColor(Color.blue);
-        g.drawString("MP: ", (int)Math.round(4.0 * _unit_size), (int)Math.round(23.0 * _unit_size));
-        g.fillRect((int)Math.round(30.0 * _unit_size), (int)Math.round(18.0 * _unit_size), (int)Math.round(_player.getMP() * 4 * _unit_size), (int)Math.round(5.0 * _unit_size));
-        
-        g.setColor(Color.yellow);
-        g.drawString("Ang: ", (int)Math.round(2.0 * _unit_size), (int)Math.round(35.0 * _unit_size));
-        if(_player.getAnger() >= _player.getMaxAnger() || _player.isAngry()){
-        	if((_counter++)%2 == 0){
-            	g.setColor(Color.red);
-        	}else{
-            	g.setColor(Color.orange); //new Color(255, 110, 0));
+        g.drawString("MP: ", (int)Math.round(4.0 * unit_size), (int)Math.round(23.0 * unit_size));
+        g.fillRect((int)Math.round(30.0 * unit_size), (int)Math.round(18.0 * unit_size), (int)Math.round(arena.player.getMP() * 4 * unit_size), (int)Math.round(5.0 * unit_size));
+        for(int i = 0; i < 4; i++){
+        	SkillCard scard;
+        	if((scard = arena.playerCard.getSkill(i)) != null){
+        		g.drawImage(scard.getSymbolImage(), 30 + i*30, 35, this);
         	}
-        }else{
-        	g.setColor(Color.yellow);
         }
-        g.fillRect((int)Math.round(30.0 * _unit_size), (int)Math.round(29.0 * _unit_size), (int)Math.round(_player.getAnger() * 4 * _unit_size), (int)Math.round(5.0 * _unit_size));
-        for(int i = 0; i < _player._kill_count; i++){
-        	g.drawImage(_star,(int)Math.round((5 + i * 10) * _unit_size) , (int)Math.round(40 * _unit_size), this);
-        }
-        
-        g.setColor(Color.RED);
-        g.drawString("alive: " + _game._no_living_target, _x - (int)Math.round(45 * _unit_size), _y - (int)Math.round(5 * _unit_size));
-		*/
 	}
 	
 	private class ImageCell{

@@ -22,8 +22,8 @@ public class ArenaPark extends Arena{
 	//private ArrayList<Cell> _items; 			// cells that will store _items
 	
 	
-	public ArenaPark(Card[] deck, LeadingRoleCard playerCard){
-		super(deck, playerCard);
+	public ArenaPark(Card[] deck, Card[] E_deck, LeadingRoleCard playerCard){
+		super(deck, E_deck, playerCard,  "Park", "Images/Other/ArenaBackground.png", "Images/Other/Park.png", "Images/Other/CardPanel.png");
 		
 	}
 	

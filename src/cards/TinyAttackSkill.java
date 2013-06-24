@@ -1,109 +1,81 @@
 package cards;
 
 import java.awt.Image;
+import java.util.ArrayList;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Image;
-import java.awt.Transparency;
-import java.awt.image.BufferedImage;
+import javahacker.Arena;
+import javahacker.Cell;
+import javahacker.Constant;
 
-import javax.swing.ImageIcon;
+
+
 
 public class TinyAttackSkill extends Skill{
 	
-	private static Image symbolImage;
-	
-	private int img_id;
-	private static Image[] imgs;
-	private static int no_img;
-	private static Image largeImage;
-	
-	/*
-	
-	static {
-		symbolImage = (new TransparentIcon("Images/TAS_Symbol.png", new Color(0,0,0))).getIcon().getImage();
-		no_imgs = 2;
-		imgs = new Image[no_imgs];
-		imgs[0] = (new TransparentIcon("Images/TAS.png", new Color(0,0,0))).getIcon().getImage();
-		imgs[1] = (new TransparentIcon("Images/TAS_2.png", new Color(0,0,0))).getIcon().getImage();
-	}
-	
-	
-	public TinyAttackSkill(Monster caster, boolean isCard){
-		super(caster);
-		reset();
-		if(isCard){
-			resetCardImage();
+	public TinyAttackSkill(SkillCard card, Monster caster, int ttl, int maxHP, int maxAGI, int maxSIGHT, int targetX, int targetY) {
+		super(card, caster, ttl, maxHP, maxAGI, maxSIGHT, targetX, targetY);
+		this.posX = caster.getX();
+		this.posY = caster.getY();
+		int diffx = posX - targetX;
+		int diffy = posY - targetY;
+		int rad  = Math.min(caster.getImageHeight(), caster.getImageWidth())/2 + SIGHT;
+		if(Math.abs(diffx) < rad){
+			this.posX = targetX;
+		}else if(diffx > 0){
+			this.posX = posX - rad;
+		}else{
+			this.posX = posX + rad;
 		}
 		
-	}
-	
-	public void reset(){
+		if(Math.abs(diffy) < rad){
+			this.posY = targetY;
+		}else if(diffy > 0){
+			this.posY = posY - rad;
+		}else{
+			this.posY = posY + rad;
+		}
 		img_id = 0;
-		ttl = 30;
 	}
 	
-	public void resetCardImage(){
-		cardImage = config.createCompatibleImage(Constant.CARDSIZE_X, Constant.CARDSIZE_Y, Transparency.BITMASK);
-		Graphics g = ((BufferedImage)cardImage).createGraphics();
-		g.drawImage(getHolderImage(), 0, 0, null);
-		g.drawImage(largeImage, 10, 10, null);
-		g.dispose();
+	public void act(Monster m){
+		m.HP -= 1;
 	}
 	
-	public Image getSymbolImage() {
-		return symbolImage;
+	public void act(Portal p){
+		p.HP -= 1;
 	}
 	
-	public void act(Monster target){
-        int hp = target.getHP();
-        if (hp > 1){
-        	target.setHP(hp - 1);
-        }else{
-        	target.setHP(0);
-        	getCaster().getKillReward();
-        }
-    }
-	
-	public void act(Obstacle ob){
-        int hp = ob.getHP();
-        if (hp > 1){
-            ob.setHP(hp - 1);
-        }else{
-        	ob.setHP(0);
-        }
-    }*/
-	
-	/*public boolean oneTimeStep((Arena arena, POOCoordinate pos){
-		ttl -= 1;
-		
-		Cell[][] map = arena.getMap();
-		
-		if(ttl == 20){
-			POOConstant.Type type = map[pos.x][pos.y].getType();
-			if(type == POOConstant.Type.PET || type == POOConstant.Type.PLAYER){
-				act((Pet)map[pos.x][pos.y].getObject());
-			}else if(type == POOConstant.Type.OBSTACLE){
-				act((Obstacle)map[pos.x][pos.y].getObject());
-			}
-		}
-		if(ttl <= 15){
-			_img_id = 1;
-		}
-		return vanish();
-	}*/
-	
-	public static int getCD(){
-		return 35;
+	public int getCD(){
+		return card.getCD();
 	}
 	
-	public static int getMPConsume(){
-		return 1;
+	public int getMPConsume(){
+		return card.getMPConsume();
 	}
 	
 	public Image getImage(){
-		return imgs[img_id];
+		return card.getImage(img_id);
+	}
+
+	public boolean oneTimeStep(Arena arena) {
+		ttl -= 1;
+		if(ttl == 0){
+			return true;
+		}else if(ttl == 20){
+			img_id++;
+			ArrayList<Cell> cells = arena.getSight(this);
+			for(Cell c: cells){
+				if(c.getTeam() != team){
+					if(c.getType() == Constant.CardType.MONSTER || c.getType() == Constant.CardType.PLAYER){
+						act(((Monster)c.getObject()));
+					}else if(c.getType() == Constant.CardType.PORTAL || c.getType() == Constant.CardType.JVM){
+						act((Portal)c.getObject());
+					}
+				}
+			}
+		}
+		
+		return false;
 	}
 	
 }

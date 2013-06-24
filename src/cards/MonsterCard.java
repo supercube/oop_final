@@ -21,8 +21,9 @@ public abstract class MonsterCard extends Card implements DImage{
 	
 	private static Image holder;
 	
-	public abstract Monster newMonster(int x, int y);
-	
+	public abstract Monster newMonster(int team, int x, int y);
+	public abstract Image getSymbolImage();
+	//public abstract Image getDeadImage();
 	
 	public MonsterCard(){
 		setType(Constant.CardType.MONSTER);
@@ -32,10 +33,8 @@ public abstract class MonsterCard extends Card implements DImage{
 		skills[1] = null;
 		equips[0] = null;
 		equips[1] = null;
-		setHolderImage((new TransparentIcon("Images/CardHolder.png", Color.black)).getIcon().getImage());
+		setHolderImage((new TransparentIcon("Images/Card/MonsterCardHolder.png", Color.black)).getIcon().getImage());
 	}
-	    
-	    
     
     public final void setHP(int HP){
     	this.HP = HP;
@@ -85,7 +84,7 @@ public abstract class MonsterCard extends Card implements DImage{
         return summonCount;
     }
     
-    public final boolean setSkill(SkillCard skill, int id){
+    public boolean setSkill(SkillCard skill, int id){
     	if(id < 0 || id > 1)
     		return false;
     	
@@ -94,7 +93,7 @@ public abstract class MonsterCard extends Card implements DImage{
         return true;
     }
     
-    public final boolean setEquip(EquipCard equip, int id){
+    public boolean setEquip(EquipCard equip, int id){
     	if(id < 0 || id > 1)
     		return false;
     	
@@ -103,26 +102,27 @@ public abstract class MonsterCard extends Card implements DImage{
         return true;
     }
     
-    public final SkillCard getSkill(int id){
+    public SkillCard getSkill(int id){
     	if(id < 0 || id > 1)
     		return null;
     				
         return skills[id];
     }
     
-    public final EquipCard getEquip(int id){
+    public EquipCard getEquip(int id){
     	if(id < 0 || id > 1)
     		return null;
     				
         return equips[id];
     }
     
+    
     public Image getHolderImage(){
 		return holder;
 	}
     
 	public void setHolderImage(Image holder){
-		MonsterCard.holder = holder;
+		this.holder = holder;
 	}
 	
 	

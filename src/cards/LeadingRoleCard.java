@@ -6,53 +6,69 @@ import java.awt.Image;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 
+import javax.swing.ImageIcon;
+
 import javahacker.Constant;
 import javahacker.TransparentIcon;
 
 public class LeadingRoleCard extends MonsterCard{
 
 
-	private int img_id;
 	private static Image[] imgs;
-	private static int no_img;
 	private static Image largeImage;
-	
+	private static Image symbolImage;
 	static {
-		no_img = 10;
-		imgs = new Image[no_img];
+		imgs = new Image[6];
 		
-		imgs[0] = (new TransparentIcon("Images/Centaur_skeleton_1.png", Color.black)).getIcon().getImage();
-		imgs[1] = (new TransparentIcon("Images/Centaur_skeleton_2.png", Color.black)).getIcon().getImage();
-		imgs[2] = (new TransparentIcon("Images/Centaur_skeleton_3.png", Color.black)).getIcon().getImage();
-		imgs[3] = (new TransparentIcon("Images/Centaur_skeleton_4.png", Color.black)).getIcon().getImage();
-		imgs[4] = (new TransparentIcon("Images/Red_Slime.png", new Color(0,0,0))).getIcon().getImage();
-		imgs[5] = (new TransparentIcon("Images/Red_Slime_2.png", new Color(0,0,0))).getIcon().getImage();
-		imgs[6] = (new TransparentIcon("Images/Red_Slime_3.png", new Color(0,0,0))).getIcon().getImage();
-		imgs[7] = (new TransparentIcon("Images/Red_Slime_4.png", new Color(0,0,0))).getIcon().getImage();
-		imgs[8] = (new TransparentIcon("Images/Slime_dead.png", new Color(0,0,0))).getIcon().getImage();
-		imgs[9] = (new TransparentIcon("Images/Red_Slime_dead.png", new Color(0,0,0))).getIcon().getImage();
-		
-		largeImage = (new TransparentIcon("Images/CentaurSkeleton.jpg", new Color(0,0,0))).getIcon().getImage();
+		imgs[0] = (new TransparentIcon("Images/Monster/right1.png", Color.black)).getIcon().getImage();
+		imgs[1] = (new TransparentIcon("Images/Monster/right2.png", Color.black)).getIcon().getImage();
+		imgs[2] = (new TransparentIcon("Images/Monster/left1.png", Color.black)).getIcon().getImage();
+		imgs[3] = (new TransparentIcon("Images/Monster/left2.png", Color.black)).getIcon().getImage();
+		imgs[4] = (new TransparentIcon("Images/Monster/Centaur_skeleton_dead1.png", Color.black)).getIcon().getImage();
+		imgs[5] = (new TransparentIcon("Images/Monster/Centaur_skeleton_dead2.png", Color.black)).getIcon().getImage();
+		symbolImage = (new TransparentIcon("Images/Symbol/CentaurSkeleton_Symbol.png", Color.black)).getIcon().getImage();
+		largeImage = new ImageIcon("Images/Card/large_CentaurSkeleton.jpg").getImage();
 	}
 	
 	
 	public LeadingRoleCard(){
+		
+		skills = new SkillCard[4];
+		skills[0] = null;
+		skills[1] = null;
+		skills[2] = null;
+		skills[3] = null;
 		reset();
 	}
+	// override setSkill
+	public boolean setSkill(SkillCard skill, int id){
+    	if(id < 0 || id > 3)
+    		return false;
+    	
+    	skills[id] = skill;
+    	resetCardImage();
+        return true;
+    }
+	// orverrid getSkill
+	public SkillCard getSkill(int id){
+    	if(id < 0 || id > 3)
+    		return null;			
+        return skills[id];
+    }
 	
-	public Monster newMonster(int x, int y){
+	public Monster newMonster(int team, int x, int y){
 		
 		if(summonCount <= 0)
 			return null;
 		
 		summonCount--;
-		return new LeadingRole(this, HP, MP, AGI, SIGHT, x, y);
+		return new LeadingRole(this, team, HP, MP, AGI, SIGHT, x, y);
 	}
 	
 	public void reset(){
-		setHP(20);
+		setHP(40);
 		setMP(20);
-		setAGI(20);
+		setAGI(70);
 		setSIGHT(10);
 		setSummonCount(1);
 		setName("CentaurSkeleton");
@@ -77,5 +93,9 @@ public class LeadingRoleCard extends MonsterCard{
 	public int getImageHeight(){
 		return 70;
 	}
-
+	
+	public Image getSymbolImage() {
+		return symbolImage;
+	}
+	
 }

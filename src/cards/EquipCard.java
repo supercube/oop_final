@@ -18,7 +18,7 @@ public abstract class EquipCard extends Card{
 	
 	public EquipCard(){
 		setType(Constant.CardType.EQUIPMENT);
-		setHolderImage((new TransparentIcon("Images/CardHolder.png", new Color(0,0,0))).getIcon().getImage());
+		setHolderImage((new TransparentIcon("Images/Card/EquipCardHolder.png", new Color(0,0,0))).getIcon().getImage());
 	}
 	
     protected final void setAdjustHP(int adjustHP){
